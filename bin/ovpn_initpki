@@ -12,6 +12,8 @@ set -e
 
 source "$OPENVPN/ovpn_env.sh"
 
+touch "$OPENVPN/vars"
+
 # Specify "nopass" as arg[2] to make the CA insecure (not recommended!)
 nopass=$1
 
@@ -21,7 +23,7 @@ easyrsa init-pki
 # CA always has a password for protection in event server is compromised. The
 # password is only needed to sign client/server certificates.  No password is
 # needed for normal OpenVPN operation.
-easyrsa build-ca $nopass
+easyrsa --batch build-ca $nopass
 
 easyrsa gen-dh
 openvpn --genkey --secret $EASYRSA_PKI/ta.key
