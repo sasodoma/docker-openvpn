@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const app = require('express')(); // Express prevzame nalogo HTML strežnika
 const http = require('http').createServer(app); // Ustvarimo http strežnik, njegov handler je app - express
 http.listen(8080); // http strežniku določimo vrata
