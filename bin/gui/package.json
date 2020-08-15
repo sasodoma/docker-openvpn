@@ -1,0 +1,16 @@
+{
+  "name": "gui",
+  "version": "1.0.0",
+  "description": "A web GUI for managing the OpenVPN server",
+  "main": "gui.js",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "\"echo \\\"Error: no test specified\\\" && exit 1\""
+  },
+  "author": "sasodoma",
+  "license": "ISC"
+}
+
