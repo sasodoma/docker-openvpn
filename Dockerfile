@@ -29,6 +29,8 @@ CMD ["ovpn_run"]
 
 ADD ./bin /usr/local/bin
 RUN chmod a+x /usr/local/bin/*
+RUN cd /usr/local/bin/gui && npm install
+RUN chmod a+x /usr/local/bin/gui/gui.js
 
 # Add support for OTP authentication using a PAM module
 ADD ./otp/openvpn /etc/pam.d/
