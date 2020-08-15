@@ -9,19 +9,19 @@ const exec = require('child_process').exec;
 
 //  Serving files
 app.get('/', function(req, res) {
-	res.sendfile('public/index.html');
+	res.sendFile('/usr/local/bin/gui/public/index.html');
 });
 
 app.get('/scripts/jquery.min.js', function(req, res) {
-	res.sendfile('public/scripts/jquery.min.js');
+	res.sendFile('/usr/local/bin/gui/public/scripts/jquery.min.js');
 });
 
 app.get('/scripts/bootstrap.min.js', function(req, res) {
-	res.sendfile('public/scripts/bootstrap.min.js');
+	res.sendFile('/usr/local/bin/gui/public/scripts/bootstrap.min.js');
 });
 
 app.get('/styles/bootstrap.min.css', function(req, res) {
-	res.sendfile('public/styles/bootstrap.min.css');
+	res.sendFile('/usr/local/bin/gui/public/styles/bootstrap.min.css');
 });
 
 //	Getting data from OpenVPN server
