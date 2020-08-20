@@ -15,7 +15,7 @@
 				<input type="text" disabled class="form-control" placeholder="vasa.domena.si" aria-label="Domena" aria-describedby="domain-addon" id="domain">
 			</div>
 			<div class="row mb-3">
-				<div class="col-md-8 mb-3">
+				<div class="col-lg-8 mb-3">
 					<div class="card">
 						<div class="card-body">
 							<h3 class="mb-3">Uporabniki:</h3>
@@ -40,7 +40,7 @@
 							</div>
 							<h6>Ustvari novega uporabnika:</h6>
 							<div class="input-group mb-3">
-								<input type="text" class="form-control" placeholder="Up. ime" aria-label="Username" aria-describedby="add-user" id="username">
+								<input type="text" class="form-control" placeholder="Uporabniško ime" aria-label="Username" aria-describedby="add-user" id="username">
 								<div class="input-group-append">
 									<button class="btn btn-primary" type="button" id="add-user" onClick="addClient()">Dodaj</button>
 								</div>
@@ -48,10 +48,17 @@
 						</div>
 					</div>
 				</div>
-				<div class="col-md-4 mb-3">
+				<div class="col-lg-4 mb-3">
 					<div class="card">
 						<div class="card-body">
-							
+							<h3>Stanje strežnika</h3>
+							<div class="alert alert-success text-center" role="alert">
+								Aktiven
+							</div>
+							<div class="row ml-0 mr-0 justify-content-between">
+								<button class="btn btn-warning mr-3" type="button">Ustavi</button>
+								<button class="btn btn-danger ml-3" type="button">Ponastavi</button>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -116,8 +123,8 @@
 						
 						tbody.innerHTML += clientRowTemplate.outerHTML;
 					}
+					spinnerDiv.style.display = 'none';
 				});
-				spinnerDiv.style.display = 'none';
 			}
 			
 			window.addEventListener('load', function() {
@@ -128,14 +135,19 @@
 			function addClient() {
 				spinnerDiv.style.display = '';
 				username = document.getElementById('username').value;
-				$.get('/addClient?username=' + username);
-				setTimeout(getClientList, 5000);
+				$.get('/addClient?username=' + username, function(data) {
+					getClientList();
+				});
+				
 			}
 			
 			function revokeClient(name) {
-				spinnerDiv.style.display = '';
-				$.get('/revokeClient?username=' + name);
-				setTimeout(getClientList, 5000);
+				if (confirm('Ste prepričani da želite razveljaviti uporabnika ' + name + '?')) {
+					spinnerDiv.style.display = '';
+					$.get('/revokeClient?username=' + name, function(data) {
+						getClientList();
+					});
+				}
 			}
 			
 			function downloadOvpn(name) {
