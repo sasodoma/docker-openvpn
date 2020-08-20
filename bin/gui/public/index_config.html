@@ -37,7 +37,7 @@
 							<div class="input-group mb-3">
 								<input type="text" class="form-control" placeholder="Up. ime" aria-label="Username" aria-describedby="add-user" id="username">
 								<div class="input-group-append">
-									<button class="btn btn-primary" type="button" id="add-user" onClick="addUser()">Dodaj</button>
+									<button class="btn btn-primary" type="button" id="add-user" onClick="addClient()">Dodaj</button>
 								</div>
 							</div>
 						</div>
@@ -117,10 +117,15 @@
 				getClientList();
 			});
 			
-			function addUser() {
+			function addClient() {
 				username = document.getElementById('username').value;
 				$.get('/addClient?username=' + username);
-				getClientList();
+				setTimeout(getClientList, 5000);
+			}
+			
+			function revokeClient(name) {
+				$.get('/revokeClient?username=' + name);
+				setTimeout(getClientList, 5000);
 			}
 		</script>
 	</body>

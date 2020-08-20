@@ -43,3 +43,12 @@ app.get('/addClient', function(req, res) {
 		res.send("Specify Username!");
 	}
 });
+
+app.get('/revokeClient', function(req, res) {
+	username = req.query.username;
+	if (username) {
+		exec('/usr/local/bin/ovpn_revokeclient ' + username + ' remove', function(error, stdout, stderr){ res.send(stdout); });
+	} else {
+		res.send("Specify Username!");
+	}
+});
