@@ -57,6 +57,7 @@ app.get('/revokeClient', function(req, res) {
 app.get('/getOvpn', function(req, res) {
 	username = req.query.username;
 	res.setHeader('Content-Type', 'application/x-openvpn-profile');
-	res.setHeader('Content-Disposition', 'attachment; filename="' + username +'.ovpn"');
+	res.setHeader('Content-Disposition', 'attachment');
+	res.setHeader('Content-Disposition', 'filename="' + username +'.ovpn"');
 	exec('/usr/local/bin/ovpn_getclient ' + username, function(error, stdout, stderr){ res.end(stdout); });
 });
