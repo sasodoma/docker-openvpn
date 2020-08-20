@@ -33,6 +33,11 @@
 							<tbody id="user-table-body">
 							</tbody>
 							</table>
+							<div id="loading-div" class="text-center" style="display: none;">
+								<div class="spinner-border text-primary m-3" role="status">
+									<span class="sr-only">Loading...</span>
+								</div>
+							</div>
 							<h6>Ustvari novega uporabnika:</h6>
 							<div class="input-group mb-3">
 								<input type="text" class="form-control" placeholder="Up. ime" aria-label="Username" aria-describedby="add-user" id="username">
@@ -80,7 +85,8 @@
 			
 			ovpnButton.innerText = 'Prenesi';
 			revButton.innerText = 'Razveljavi';
-			
+		
+			let spinnerDiv;
 		
 			function getClientList() {
 				$.getJSON('/clientList.json', function(data) {
@@ -111,21 +117,29 @@
 						tbody.innerHTML += clientRowTemplate.outerHTML;
 					}
 				});
+				spinnerDiv.style.display = 'none';
 			}
 			
 			window.addEventListener('load', function() {
+				spinnerDiv = document.getElementById('loading-div');
 				getClientList();
 			});
 			
 			function addClient() {
+				spinnerDiv.style.display = '';
 				username = document.getElementById('username').value;
 				$.get('/addClient?username=' + username);
 				setTimeout(getClientList, 5000);
 			}
 			
 			function revokeClient(name) {
+				spinnerDiv.style.display = '';
 				$.get('/revokeClient?username=' + name);
 				setTimeout(getClientList, 5000);
+			}
+			
+			function downloadOvpn(name) {
+				window.location.href = '/getOvpn?username=' + name;
 			}
 		</script>
 	</body>
