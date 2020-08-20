@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="scripts/jquery.min.js"></script>
+		<script src="scripts/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="styles/bootstrap.min.css">
+	</head>
+	<body>
+		<div class="container mt-3">
+			<h1>Konfiguracija OpenVPN strežnika</h1>
+			<div class="input-group mb-4">
+				<div class="input-group-prepend">
+					<span class="input-group-text" id="domain-addon">Domena:</span>
+				</div>
+				<input type="text" disabled class="form-control" placeholder="vasa.domena.si" aria-label="Domena" aria-describedby="domain-addon" id="domain">
+			</div>
+			<div class="row mb-3">
+				<div class="col-8">
+					<div class="card">
+						<div class="card-body">
+							<h3 class="mb-3">Uporabniki:</h3>
+							<table class="table table-sm text-center">
+							<thead>
+								<tr>
+									<th scope="col">Ime</th>
+									<th scope="col">Velja od</th>
+									<th scope="col">Velja do</th>
+									<th scope="col">Stanje</th>
+									<th scope="col">.ovpn</th>
+									<th scope="col">Izbriši</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>Pixel3</td>
+									<td>13. Apr 2020</td>
+									<td>5. Nov 2020</td>
+									<td>VALID</td>
+									<td>
+										<button class="btn-sm btn-secondary" type="button" id="download-pixel3">Prenesi</button>
+									</td>
+									<td>
+										<button class="btn-sm btn-danger" type="button" id="delete-pixel3">Izbriši</button>
+									</td>
+								</tr>
+								<tr>
+									<td>Kitajc</td>
+									<td>13. Apr 2020</td>
+									<td>5. Nov 2020</td>
+									<td>VALID</td>
+									<td>
+										<button class="btn-sm btn-secondary" type="button" id="download-kitajc">Prenesi</button>
+									</td>
+									<td>
+										<button class="btn-sm btn-danger" type="button" id="delete-kitajc">Izbriši</button>
+									</td>
+								</tr>
+							</tbody>
+							</table>
+							<h6>Ustvari novega uporabnika:</h6>
+							<div class="input-group mb-3">
+								<input type="text" class="form-control" placeholder="Up. ime" aria-label="Username" aria-describedby="add-user" id="username">
+								<div class="input-group-append">
+									<button class="btn btn-primary" type="button" id="add-user">Dodaj</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-4">
+					<div class="card">
+						<div class="card-body">
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
