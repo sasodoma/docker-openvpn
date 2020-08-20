@@ -7,7 +7,7 @@
 	</head>
 	<body>
 		<div class="container mt-3">
-			<h1>Konfiguracija OpenVPN strežnika</h1>
+			<h1>Upravljanje OpenVPN strežnika</h1>
 			<div class="input-group mb-4">
 				<div class="input-group-prepend">
 					<span class="input-group-text" id="domain-addon">Domena:</span>
@@ -27,41 +27,17 @@
 									<th scope="col">Velja do</th>
 									<th scope="col">Stanje</th>
 									<th scope="col">.ovpn</th>
-									<th scope="col">Izbriši</th>
+									<th scope="col">Razveljavi</th>
 								</tr>
 							</thead>
-							<tbody>
-								<tr>
-									<td>Pixel3</td>
-									<td>13. Apr 2020</td>
-									<td>5. Nov 2020</td>
-									<td>VALID</td>
-									<td>
-										<button class="btn-sm btn-secondary" type="button" id="download-pixel3">Prenesi</button>
-									</td>
-									<td>
-										<button class="btn-sm btn-danger" type="button" id="delete-pixel3">Izbriši</button>
-									</td>
-								</tr>
-								<tr>
-									<td>Kitajc</td>
-									<td>13. Apr 2020</td>
-									<td>5. Nov 2020</td>
-									<td>VALID</td>
-									<td>
-										<button class="btn-sm btn-secondary" type="button" id="download-kitajc">Prenesi</button>
-									</td>
-									<td>
-										<button class="btn-sm btn-danger" type="button" id="delete-kitajc">Izbriši</button>
-									</td>
-								</tr>
+							<tbody id="user-table-body">
 							</tbody>
 							</table>
 							<h6>Ustvari novega uporabnika:</h6>
 							<div class="input-group mb-3">
 								<input type="text" class="form-control" placeholder="Up. ime" aria-label="Username" aria-describedby="add-user" id="username">
 								<div class="input-group-append">
-									<button class="btn btn-primary" type="button" id="add-user">Dodaj</button>
+									<button class="btn btn-primary" type="button" id="add-user" onClick="addUser()">Dodaj</button>
 								</div>
 							</div>
 						</div>
@@ -76,5 +52,76 @@
 				</div>
 			</div>
 		</div>
+		<script>
+			let clientRowTemplate = document.createElement('tr');
+			
+			let nameCol = document.createElement('td');
+			let startCol = document.createElement('td');
+			let endCol = document.createElement('td');
+			let statusCol = document.createElement('td');
+			let ovpnCol = document.createElement('td');
+			let revCol = document.createElement('td');
+			
+			let ovpnButton = document.createElement('button');
+			let revButton = document.createElement('button');
+			
+			clientRowTemplate.appendChild(nameCol);
+			clientRowTemplate.appendChild(startCol);
+			clientRowTemplate.appendChild(endCol);
+			clientRowTemplate.appendChild(statusCol);
+			clientRowTemplate.appendChild(ovpnCol);
+			clientRowTemplate.appendChild(revCol);
+			
+			ovpnCol.appendChild(ovpnButton);
+			revCol.appendChild(revButton);
+			
+			ovpnButton.className = 'btn-sm btn-secondary';
+			revButton.className = 'btn-sm btn-danger';
+			
+			ovpnButton.innerText = 'Prenesi';
+			revButton.innerText = 'Razveljavi';
+			
+		
+			function getClientList() {
+				$.getJSON('/clientList.json', function(data) {
+					tbody = document.getElementById('user-table-body');
+					tbody.innerHTML = '';
+					for (client of data) {
+						switch (client.status) {
+							case 'VALID':
+								statusCol.innerText = 'Veljaven';
+								break;
+							case 'EXPIRED':
+								statusCol.innerText = 'Potekel';
+								break;
+							case 'REVOKED':
+								statusCol.innerText = 'Razveljavljen';
+								break;
+							case 'EXPIRED':
+								statusCol.innerText = 'Neveljaven';
+								break;
+						}
+						nameCol.innerText = client.name;
+						startCol.innerText = new Date(Date.parse(client.begin)).toLocaleString();
+						endCol.innerText = new Date(Date.parse(client.end)).toLocaleString();
+						
+						ovpnButton.setAttribute('onClick', 'downloadOvpn(\'' + client.name + '\');');
+						revButton.setAttribute('onClick', 'revokeClient(\'' + client.name + '\')');
+						
+						tbody.innerHTML += clientRowTemplate.outerHTML;
+					}
+				});
+			}
+			
+			window.addEventListener('load', function() {
+				getClientList();
+			});
+			
+			function addUser() {
+				username = document.getElementById('username').value;
+				$.get('/addClient?username=' + username);
+				getClientList();
+			}
+		</script>
 	</body>
 </html>
