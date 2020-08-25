@@ -48,7 +48,7 @@ app.get('/styles/bootstrap.min.css', function(req, res) {
 });
 
 //	Server management
-app.get('/startStop', function(req, res)) {
+app.get('/startStop', function(req, res) {
 	if (serverStatus.isRunning) {
 		if (server.kill()) {
 			serverStatus.isRunning = false;
@@ -57,7 +57,7 @@ app.get('/startStop', function(req, res)) {
 		server = exec('ovpn_run');
 		serverStatus.isRunning = true;
 	}
-}
+});
 
 //	Client management
 app.get('/addClient', function(req, res) {
