@@ -65,6 +65,14 @@ app.get('/startStop', function(req, res) {
 	res.end();
 });
 
+app.get('/fullReset', function(req, res) {
+	if (serverStatus.isRunning) {
+		server.kill();
+	}
+	exec('rm -r /etc/openvpn/*')
+	res.end();
+});
+
 //	Client management
 app.get('/addClient', function(req, res) {
 	if (serverStatus.isSetup) {
