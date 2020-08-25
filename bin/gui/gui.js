@@ -91,7 +91,7 @@ app.get('/clientList.json', function(req, res) {
 	if (serverStatus.isSetup) {
 		res.setHeader('Content-Type', 'application/json');
 		exec('/usr/local/bin/ovpn_listclients_json', function(error, stdout, stderr){ res.end(stdout); });
-	else {
+	} else {
 		res.status(409).send('Setup the server before listing clients');
 	}
 });
@@ -103,7 +103,7 @@ app.get('/getOvpn', function(req, res) {
 		res.setHeader('Content-Disposition', 'attachment');
 		res.setHeader('Content-Disposition', 'filename="' + username +'.ovpn"');
 		exec('/usr/local/bin/ovpn_getclient ' + username, function(error, stdout, stderr){ res.end(stdout); });
-	else {
+	} else {
 		res.status(409).send('Setup the server before downloading config');
 	}
 });
