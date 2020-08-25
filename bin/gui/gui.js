@@ -19,6 +19,10 @@ try {
 	serverStatus.domain = 'vasa.domena.si';
 }
 
+function saveConfig() {
+	fs.writeFileSync('/etc/openvpn/gui-conf.json', JSON.stringify(serverStatus));
+}
+
 let server;
 
 //	Start the OpenVPN server process if it was running before
@@ -57,6 +61,8 @@ app.get('/startStop', function(req, res) {
 		server = exec('ovpn_run');
 		serverStatus.isRunning = true;
 	}
+	saveConfig();
+	res.end();
 });
 
 //	Client management

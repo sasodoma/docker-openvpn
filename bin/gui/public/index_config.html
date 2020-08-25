@@ -171,20 +171,19 @@
 			
 			function getStatus() {
 				$.getJSON('/getStatus.json', function(data) {
-					serverStatus = JSON.parse(data);
-					domain.value = serverStatus.domain;
-					if (serverStatus.isRunning) {
+					domain.value = data.domain;
+					if (data.isRunning) {
 						statusText.className ='alert alert-success text-center';
 						statusText.innerText = 'Aktiven';
 						
-						start-stop-button.className = 'btn btn-warning mr-3';
-						start-stop-button.innerText = 'Ustavi';
+						startStopButton.className = 'btn btn-warning mr-3';
+						startStopButton.innerText = 'Ustavi';
 					} else {
 						statusText.className = 'alert alert-danger text-center';
 						statusText.innerText = 'Ustavljen';
 						
-						start-stop-button.className = 'btn btn-success mr-3';
-						start-stop-button.innerText = 'Zaženi';
+						startStopButton.className = 'btn btn-success mr-3';
+						startStopButton.innerText = 'Zaženi';
 					}
 				});
 			}
