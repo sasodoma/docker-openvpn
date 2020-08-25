@@ -26,7 +26,7 @@ VOLUME ["/etc/openvpn"]
 EXPOSE 1194/udp
 EXPOSE 8080/tcp
 
-CMD ["ovpn_run"]
+CMD ["/usr/local/bin/gui/gui.js"]
 
 ADD ./bin /usr/local/bin
 RUN chmod a+x /usr/local/bin/*

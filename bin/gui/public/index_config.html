@@ -52,12 +52,12 @@
 					<div class="card">
 						<div class="card-body">
 							<h3>Stanje strežnika</h3>
-							<div class="alert alert-success text-center" role="alert">
+							<div class="alert alert-success text-center" role="alert" id="status-text">
 								Aktiven
 							</div>
 							<div class="row ml-0 mr-0 justify-content-between">
-								<button class="btn btn-warning mr-3" type="button">Ustavi</button>
-								<button class="btn btn-danger ml-3" type="button">Ponastavi</button>
+								<button class="btn btn-warning mr-3" type="button" id="start-stop-button">Ustavi</button>
+								<button class="btn btn-danger ml-3" type="button" id="full-reset-button">Ponastavi</button>
 							</div>
 						</div>
 					</div>
@@ -93,7 +93,11 @@
 			ovpnButton.innerText = 'Prenesi';
 			revButton.innerText = 'Razveljavi';
 		
+			let domain;
+		
 			let spinnerDiv;
+			
+			let statusText, startStopButton, fullResetButton;
 		
 			function getClientList() {
 				$.getJSON('/clientList.json', function(data) {
@@ -128,8 +132,19 @@
 			}
 			
 			window.addEventListener('load', function() {
+				domain = document.getElementById('domain');
+				
 				spinnerDiv = document.getElementById('loading-div');
 				getClientList();
+				
+				statusText = document.getElementById('status-text');
+				startStopButton = document.getElementById('start-stop-button');
+				fullResetButton = document.getElementById('full-reset-button');
+				
+				startStopButton.addEventListener('click', startStop);
+				fullResetButton.addEventListener('click', fullReset);
+				
+				getStatus();
 			});
 			
 			function addClient() {
@@ -152,6 +167,40 @@
 			
 			function downloadOvpn(name) {
 				window.location.href = '/getOvpn?username=' + name;
+			}
+			
+			function getStatus() {
+				$.getJSON('/getStatus.json', function(data) {
+					serverStatus = JSON.parse(data);
+					domain.value = serverStatus.domain;
+					if (serverStatus.isRunning) {
+						statusText.className ='alert alert-success text-center';
+						statusText.innerText = 'Aktiven';
+						
+						start-stop-button.className = 'btn btn-warning mr-3';
+						start-stop-button.innerText = 'Ustavi';
+					} else {
+						statusText.className = 'alert alert-danger text-center';
+						statusText.innerText = 'Ustavljen';
+						
+						start-stop-button.className = 'btn btn-success mr-3';
+						start-stop-button.innerText = 'Zaženi';
+					}
+				});
+			}
+			
+			function startStop() {
+				$.get('/startStop', function(data) {
+					getStatus();
+				});
+			}
+			
+			function fullReset() {
+				if (confirm('S tem bodo izbrisani vsi uporabniki, ste prepričani da želite nadaljevati?')) {
+					$.get('/fullReset', function(data) {
+						window.location.reload();
+					});
+				}
 			}
 		</script>
 	</body>
