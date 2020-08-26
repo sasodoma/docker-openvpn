@@ -8,6 +8,7 @@ const exec = require('child_process').exec;
 const fs = require('fs');
 
 let serverStatus;
+let setupInProgress = false;
 
 try {
 	configFile = fs.readFileSync('/etc/openvpn/gui-conf.json');
@@ -34,6 +35,8 @@ if (serverStatus.isRunning) {
 app.get('/', function(req, res) {
 	if (serverStatus.isSetup) {
 		res.sendFile('/usr/local/bin/gui/public/index_config.html');
+	} else if (setupInProgress) {
+		res.sendFile('/usr/local/bin/gui/public/index_waiting.html');
 	} else {
 		res.sendFile('/usr/local/bin/gui/public/index_setup.html');
 	}
@@ -79,15 +82,17 @@ app.get('/fullReset', function(req, res) {
 //	Client management
 app.get('/setupServer', function(req, res) {
 	if (!serverStatus.isSetup) {
+		setupInProgress = true;
 		domain = req.query.domain;
 		if (domain) {
-			exec('/usr/local/bin/ovpn_genconfig -u udp://' + username, function(error, stdout, stderr) {
+			exec('/usr/local/bin/ovpn_genconfig -u udp://' + domain, function(error, stdout, stderr) {
 				exec('/usr/local/bin/ovpn_initpki nopass', function(error, stdout, stderr) {
 					serverStatus.domain = domain;
 					serverStatus.isSetup = true;
 					server = exec('ovpn_run');
 					serverStatus.isRunning = true;
 					saveConfig();
+					setupInProgress = false;
 					res.send(stdout); 
 				});
 			});

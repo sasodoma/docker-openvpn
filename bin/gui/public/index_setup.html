@@ -23,7 +23,8 @@
 								<div class="spinner-border text-primary m-3" role="status">
 									<span class="sr-only">Loading...</span>
 								</div>
-								<p>Strežnik se pripravlja za prvo uporabo.</p>
+								<p>Strežnik se pripravlja za prvo uporabo. <br>
+								(To lahko traja nekaj časa.)</p>
 							</div>
 						</div>
 					</div>
@@ -42,6 +43,8 @@
 			function setupServer() {
 				spinnerDiv.style.display = '';
 				$.get('/setupServer?domain=' + domain.value, function(data) {
+					window.location.reload();
+				}).fail(function() {
 					window.location.reload();
 				});
 			}

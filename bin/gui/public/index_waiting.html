@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="scripts/jquery.min.js"></script>
+		<script src="scripts/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="styles/bootstrap.min.css">
+	</head>
+	<body>
+		<div class="container mt-3">
+			<h1>Nastavitev OpenVPN strežnika</h1>
+			<div class="row mb-3">
+				<div class="col-12">
+					<div class="card">
+						<div class="card-body">
+							<div id="loading-div" class="text-center">
+								<div class="spinner-border text-primary m-3" role="status">
+									<span class="sr-only">Loading...</span>
+								</div>
+								<p>Strežnik se še vedno pripravlja.</p>
+								<p>(Ustvarjanje varnih parametrov za šifriranje lahko <br>
+								traja zelo dolgo. Stran se bo samodejno osvežila, <br>
+								okno lahko tudi zaprete in pridete nazaj kasneje.)</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			window.addEventListener('load', function() {
+				setTimeout(function() {
+					window.location.reload();
+				}, 60000);
+			});
+		</script>
+	</body>
+</html>
