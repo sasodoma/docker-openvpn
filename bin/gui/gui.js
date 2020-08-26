@@ -82,9 +82,10 @@ app.get('/fullReset', function(req, res) {
 //	Client management
 app.get('/setupServer', function(req, res) {
 	if (!serverStatus.isSetup) {
-		setupInProgress = true;
 		domain = req.query.domain;
-		if (domain) {
+		let invalidDomain = new RegExp("[^a-z0-9-.]","i");
+		if (domain && !invalidDomain.test(domain)) {
+			setupInProgress = true;
 			exec('/usr/local/bin/ovpn_genconfig -u udp://' + domain, function(error, stdout, stderr) {
 				exec('/usr/local/bin/ovpn_initpki nopass', function(error, stdout, stderr) {
 					serverStatus.domain = domain;
@@ -97,10 +98,10 @@ app.get('/setupServer', function(req, res) {
 				});
 			});
 		} else {
-			res.status(400).send("Specify domain!");
+			res.status(400).send("Invalid domain name!");
 		}
 	} else {
-		res.status(409).send('Server is already setup. Do a full reset to change the domain');
+		res.status(409).send('Server is already setup. Do a full reset to change the domain.');
 	}
 });
 
@@ -114,7 +115,7 @@ app.get('/addClient', function(req, res) {
 			res.status(400).send("Specify Username!");
 		}
 	} else {
-		res.status(409).send('Setup the server before adding clients');
+		res.status(409).send('Setup the server before adding clients.');
 	}
 });
 
@@ -137,7 +138,7 @@ app.get('/clientList.json', function(req, res) {
 		res.setHeader('Content-Type', 'application/json');
 		exec('/usr/local/bin/ovpn_listclients_json', function(error, stdout, stderr){ res.end(stdout); });
 	} else {
-		res.status(409).send('Setup the server before listing clients');
+		res.status(409).send('Setup the server before listing clients.');
 	}
 });
 
@@ -149,7 +150,7 @@ app.get('/getOvpn', function(req, res) {
 		res.setHeader('Content-Disposition', 'filename="' + username +'.ovpn"');
 		exec('/usr/local/bin/ovpn_getclient ' + username, function(error, stdout, stderr){ res.end(stdout); });
 	} else {
-		res.status(409).send('Setup the server before downloading config');
+		res.status(409).send('Setup the server before downloading config.');
 	}
 });
 
