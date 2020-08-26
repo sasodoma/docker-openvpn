@@ -30,5 +30,21 @@
 				</div>
 			</div>
 		</div>
+		<script>
+			window.addEventListener('load', function() {
+				domain = document.getElementById('domain');				
+				spinnerDiv = document.getElementById('loading-div');
+				nextButton = document.getElementById('next-button');
+				
+				nextButton.addEventListener('click', setupServer);
+			});
+			
+			function setupServer() {
+				spinnerDiv.style.display = '';
+				$.get('/setupServer?domain=' + domain.value, function(data) {
+					window.location.reload();
+				});
+			}
+		</script>
 	</body>
 </html>

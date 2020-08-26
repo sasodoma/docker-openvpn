@@ -69,8 +69,34 @@ app.get('/fullReset', function(req, res) {
 	if (serverStatus.isRunning) {
 		server.kill();
 	}
+	serverStatus.isRunning = false;
+	serverStatus.isSetup = false;
+	serverStatus.domain = '';
 	exec('rm -r /etc/openvpn/*')
 	res.end();
+});
+
+//	Client management
+app.get('/setupServer', function(req, res) {
+	if (!serverStatus.isSetup) {
+		domain = req.query.domain;
+		if (domain) {
+			exec('/usr/local/bin/ovpn_genconfig -u udp://' + username, function(error, stdout, stderr) {
+				exec('/usr/local/bin/ovpn_initpki nopass', function(error, stdout, stderr) {
+					serverStatus.domain = domain;
+					serverStatus.isSetup = true;
+					server = exec('ovpn_run');
+					serverStatus.isRunning = true;
+					saveConfig();
+					res.send(stdout); 
+				});
+			});
+		} else {
+			res.status(400).send("Specify domain!");
+		}
+	} else {
+		res.status(409).send('Server is already setup. Do a full reset to change the domain');
+	}
 });
 
 //	Client management
