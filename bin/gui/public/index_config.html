@@ -16,7 +16,7 @@
 			</div>
 			<div class="row mb-3">
 				<div class="col-lg-8 mb-3">
-					<div class="card">
+					<div class="card h-100">
 						<div class="card-body">
 							<h3 class="mb-3">Uporabniki:</h3>
 							<table class="table table-sm text-center">
@@ -42,14 +42,14 @@
 							<div class="input-group mb-3">
 								<input type="text" class="form-control" placeholder="Uporabniško ime" aria-label="Username" aria-describedby="add-user" id="username">
 								<div class="input-group-append">
-									<button class="btn btn-primary" type="button" id="add-user" onClick="addClient()">Dodaj</button>
+									<button class="btn btn-primary" type="button" id="add-client">Dodaj</button>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 				<div class="col-lg-4 mb-3">
-					<div class="card">
+					<div class="card h-100">
 						<div class="card-body">
 							<h3>Stanje strežnika</h3>
 							<div class="alert alert-success text-center" role="alert" id="status-text">
@@ -59,6 +59,26 @@
 								<button class="btn btn-warning mr-3" type="button" id="start-stop-button">Ustavi</button>
 								<button class="btn btn-danger ml-3" type="button" id="full-reset-button">Ponastavi</button>
 							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mb-3">
+				<div class="col-12 mb-3">
+					<div class="card">
+						<div class="card-body">
+							<h4>OpenVPN odjemalec</h4>
+							<h6>Android</h6>
+							<p><a href="https://play.google.com/store/apps/details?id=net.openvpn.openvpn">OpenVPN Connect – Fast & Safe SSL VPN Client</a></p>
+							<h6>iOS</h6>
+							<p><a href="https://apps.apple.com/us/app/openvpn-connect/id590379981">OpenVPN Connect</a></p>
+							<h6>Windows</h6>
+							<p><a href="https://openvpn.net/client-connect-vpn-for-windows/">OpenVPN Connect for Windows</a></p>
+							<h6>macOS</h6>
+							<p><a href="https://openvpn.net/client-connect-vpn-for-mac-os/">OpenVPN Connect for Mac OS</a></p>
+							<h6>Linux</h6>
+							<p><a href="https://openvpn.net/openvpn-client-for-linux/">OpenVPN 3 for Linux</a></p>
+							<p>Po namestitivi zgoraj ustvarite uporabnika za svojo napravo, prenesite .ovpn konfiguracijsko datoteko in jo uvozite v program.</p>
 						</div>
 					</div>
 				</div>
@@ -137,6 +157,16 @@
 				spinnerDiv = document.getElementById('loading-div');
 				getClientList();
 				
+				addClientButton = document.getElementById('add-client');
+				addClientButton.addEventListener('click', addClient);
+				
+				usernameBox = document.getElementById('username');
+				usernameBox.addEventListener('keydown', function (event) {
+					if (event.keyCode === 13) {
+						addClient();
+					}
+				});
+				
 				statusText = document.getElementById('status-text');
 				startStopButton = document.getElementById('start-stop-button');
 				fullResetButton = document.getElementById('full-reset-button');
@@ -149,8 +179,11 @@
 			
 			function addClient() {
 				spinnerDiv.style.display = '';
-				username = document.getElementById('username').value;
+				username = usernameBox.value.replace(/[^a-z0-9-.]/gi, "_");
+				usernameBox.value = '';
 				$.get('/addClient?username=' + username, function(data) {
+					getClientList();
+				}).fail(function() {
 					getClientList();
 				});
 				
