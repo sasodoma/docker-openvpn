@@ -10,6 +10,8 @@ const fs = require('fs');
 let serverStatus;
 let setupInProgress = false;
 
+const usernameRegex = new RegExp("[^a-z0-9-.]","gi");
+
 try {
 	configFile = fs.readFileSync('/etc/openvpn/gui-conf.json');
 	serverStatus = JSON.parse(configFile);
@@ -108,7 +110,7 @@ app.get('/setupServer', function(req, res) {
 //	Client management
 app.get('/addClient', function(req, res) {
 	if (serverStatus.isSetup) {
-		username = req.query.username;
+		username = req.query.username.replace(usernameRegex, "_");
 		if (username) {
 			exec('/usr/local/bin/easyrsa build-client-full ' + username + ' nopass', function(error, stdout, stderr){ res.send(stdout); });
 		} else {
@@ -121,7 +123,7 @@ app.get('/addClient', function(req, res) {
 
 app.get('/revokeClient', function(req, res) {
 	if (serverStatus.isSetup) {
-		username = req.query.username;
+		username = req.query.username.replace(usernameRegex, "_");;
 		if (username) {
 			exec('/usr/local/bin/ovpn_revokeclient ' + username + ' remove', function(error, stdout, stderr){ res.send(stdout); });
 		} else {
@@ -144,7 +146,7 @@ app.get('/clientList.json', function(req, res) {
 
 app.get('/getOvpn', function(req, res) {
 	if (serverStatus.isSetup) {
-		username = req.query.username;
+		username = req.query.username.replace(usernameRegex, "_");;
 		res.setHeader('Content-Type', 'application/x-openvpn-profile');
 		res.setHeader('Content-Disposition', 'attachment');
 		res.setHeader('Content-Disposition', 'filename="' + username +'.ovpn"');

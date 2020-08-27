@@ -43,8 +43,8 @@
 			let invalidDomain = new RegExp("[^a-z0-9-.]","i");
 			
 			function setupServer() {
-				spinnerDiv.style.display = '';
 				if (!invalidDomain.test(domain.value)) {
+					spinnerDiv.style.display = '';
 					$.get('/setupServer?domain=' + domain.value, function(data) {
 						window.location.reload();
 					}).fail(function() {
