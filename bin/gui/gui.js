@@ -123,7 +123,7 @@ app.get('/addClient', function(req, res) {
 		username = req.query.username.replace(usernameRegex, "_");
 		caPassword = req.query.capass.replace(usernameRegex, "_");
 		if (username) {
-			exec('EASYRSA_PASSIN=pass:' + caPassword + '/usr/local/bin/easyrsa build-client-full ' + username + ' nopass', function(error, stdout, stderr){ res.send(stdout); });
+			exec('EASYRSA_PASSIN=pass:' + caPassword + ' /usr/local/bin/easyrsa build-client-full ' + username + ' nopass', function(error, stdout, stderr){ res.send(stdout); });
 		} else {
 			res.status(400).send("Specify Username!");
 		}
@@ -137,7 +137,7 @@ app.get('/revokeClient', function(req, res) {
 		username = req.query.username.replace(usernameRegex, "_");;
 		caPassword = req.query.capass.replace(usernameRegex, "_");
 		if (username) {
-			exec('/usr/local/bin/ovpn_revokeclient ' + username + ' remove' + caPassword, function(error, stdout, stderr){ res.send(stdout); });
+			exec('/usr/local/bin/ovpn_revokeclient ' + username + ' remove ' + caPassword, function(error, stdout, stderr){ res.send(stdout); });
 		} else {
 			res.status(400).send("Specify Username!");
 		}
