@@ -13,15 +13,16 @@
 					<div class="card">
 						<div class="card-body">
 							<p>Pred prvo uporabo je treba strežnik konfigurirati. Vnesite ime domene, na kateri bo OpenVPN strežnik dosegljiv:</p>
-							<div class="input-group mb-3">
-								<input type="text" class="form-control" placeholder="vasa.domena.si" aria-label="Domena" aria-describedby="next-button" id="domain">
-								<div class="input-group-append">
-									<button class="btn btn-primary" type="button" id="next-button">Naprej</button>
-								</div>
-							</div>
+							<input type="text" class="form-control mb-3" placeholder="vasa.domena.si" aria-label="Domena" aria-describedby="next-button" id="domain">
+							
 							<p>Za večjo varnost lahko nastavite geslo za izdajo potrdil. To geslo bo potrebno za dodajanje in brisanje uporabnikov.
 							Če ga izgubite, boste morali strežnik ponastaviti in vsi uporabniki bodo izbrisani.</p>
-							<input type="password" class="form-control" placeholder="Geslo" id="ca-password">
+							<input type="password" class="form-control mb-3" placeholder="Geslo za potrdila" id="ca-password">
+							
+							<div class="text-center md-3">
+								<button class="btn btn-primary" type="button" id="next-button">Naprej</button>
+							</div>
+							
 							<div id="loading-div" class="text-center" style="display: none;">
 								<div class="spinner-border text-primary m-3" role="status">
 									<span class="sr-only">Loading...</span>
@@ -36,7 +37,8 @@
 		</div>
 		<script>
 			window.addEventListener('load', function() {
-				domain = document.getElementById('domain');				
+				domain = document.getElementById('domain');		
+				caPass = document.getElementById('ca-password');
 				spinnerDiv = document.getElementById('loading-div');
 				nextButton = document.getElementById('next-button');
 				
@@ -48,7 +50,7 @@
 			function setupServer() {
 				if (!invalidDomain.test(domain.value)) {
 					spinnerDiv.style.display = '';
-					$.get('/setupServer?domain=' + domain.value, function(data) {
+					$.get('/setupServer?domain=' + domain.value + '&capass=' + caPass.value, function(data) {
 						window.location.reload();
 					}).fail(function() {
 						window.location.reload();

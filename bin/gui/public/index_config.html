@@ -55,10 +55,11 @@
 							<div class="alert alert-success text-center" role="alert" id="status-text">
 								Aktiven
 							</div>
-							<div class="row ml-0 mr-0 justify-content-between">
+							<div class="row ml-0 mr-0 mb-3 justify-content-between">
 								<button class="btn btn-warning mr-3" type="button" id="start-stop-button">Ustavi</button>
 								<button class="btn btn-danger ml-3" type="button" id="full-reset-button">Ponastavi</button>
 							</div>
+							<input type="text" class="form-control" placeholder="Geslo za potrdila" id="ca-password" style="display: none">
 						</div>
 					</div>
 				</div>
@@ -117,7 +118,7 @@
 		
 			let spinnerDiv;
 			
-			let statusText, startStopButton, fullResetButton;
+			let statusText, startStopButton, fullResetButton, caPass;
 		
 			function getClientList() {
 				$.getJSON('/clientList.json', function(data) {
@@ -170,6 +171,7 @@
 				statusText = document.getElementById('status-text');
 				startStopButton = document.getElementById('start-stop-button');
 				fullResetButton = document.getElementById('full-reset-button');
+				caPass = document.getElementById('ca-password');
 				
 				startStopButton.addEventListener('click', startStop);
 				fullResetButton.addEventListener('click', fullReset);
@@ -178,23 +180,30 @@
 			});
 			
 			function addClient() {
-				spinnerDiv.style.display = '';
-				username = usernameBox.value.replace(/[^a-z0-9-.]/gi, "_");
-				usernameBox.value = '';
-				$.get('/addClient?username=' + username, function(data) {
-					getClientList();
-				}).fail(function() {
-					getClientList();
-				});
-				
+				if (caPass.style.display == 'none' || caPass.value) {
+					spinnerDiv.style.display = '';
+					username = usernameBox.value.replace(/[^a-z0-9-.]/gi, "_");
+					usernameBox.value = '';
+					$.get('/addClient?username=' + username + '&capass=' + caPass.value, function(data) {
+						getClientList();
+					}).fail(function() {
+						getClientList();
+					});
+				} else {
+					alert("Vnesite geslo za potrdila!")
+				}	
 			}
 			
 			function revokeClient(name) {
-				if (confirm('Ste prepričani da želite razveljaviti uporabnika ' + name + '?')) {
-					spinnerDiv.style.display = '';
-					$.get('/revokeClient?username=' + name, function(data) {
-						getClientList();
-					});
+				if (caPass.style.display == 'none' || caPass.value) {
+					if (confirm('Ste prepričani da želite razveljaviti uporabnika ' + name + '?')) {
+						spinnerDiv.style.display = '';
+						$.get('/revokeClient?username=' + name + '&capass=' + caPass.value, function(data) {
+							getClientList();
+						});
+					}
+				} else {
+					alert("Vnesite geslo za potrdila!")
 				}
 			}
 			
@@ -205,6 +214,10 @@
 			function getStatus() {
 				$.getJSON('/getStatus.json', function(data) {
 					domain.value = data.domain;
+					if (data.hasCApass) {
+						caPass.style.display = '';
+					}
+					
 					if (data.isRunning) {
 						statusText.className ='alert alert-success text-center';
 						statusText.innerText = 'Aktiven';

@@ -19,6 +19,7 @@ try {
 	serverStatus = new Object();
 	serverStatus.isSetup = false;
 	serverStatus.isRunning = false;
+	serverStatus.hasCApass = false;
 	serverStatus.domain = 'vasa.domena.si';
 }
 
@@ -77,6 +78,7 @@ app.get('/fullReset', function(req, res) {
 	serverStatus.isRunning = false;
 	serverStatus.isSetup = false;
 	serverStatus.domain = '';
+	serverStatus.hasCApass = false;
 	exec('rm -r /etc/openvpn/*')
 	res.end();
 });
@@ -85,11 +87,19 @@ app.get('/fullReset', function(req, res) {
 app.get('/setupServer', function(req, res) {
 	if (!serverStatus.isSetup) {
 		domain = req.query.domain;
+		caPassword = req.query.capass.replace(usernameRegex, "_");
 		let invalidDomain = new RegExp("[^a-z0-9-.]","i");
 		if (domain && !invalidDomain.test(domain)) {
+			let command;
+			if (caPassword) {
+				command = '/usr/local/bin/ovpn_initpki "" ' + caPassword;
+				serverStatus.hasCApass = true;
+			} else {
+				command = '/usr/local/bin/ovpn_initpki nopass';
+			}
 			setupInProgress = true;
 			exec('/usr/local/bin/ovpn_genconfig -u udp://' + domain, function(error, stdout, stderr) {
-				exec('/usr/local/bin/ovpn_initpki nopass', function(error, stdout, stderr) {
+				exec(command, function(error, stdout, stderr) {
 					serverStatus.domain = domain;
 					serverStatus.isSetup = true;
 					server = exec('ovpn_run');
@@ -111,8 +121,9 @@ app.get('/setupServer', function(req, res) {
 app.get('/addClient', function(req, res) {
 	if (serverStatus.isSetup) {
 		username = req.query.username.replace(usernameRegex, "_");
+		caPassword = req.query.capass.replace(usernameRegex, "_");
 		if (username) {
-			exec('/usr/local/bin/easyrsa build-client-full ' + username + ' nopass', function(error, stdout, stderr){ res.send(stdout); });
+			exec('EASYRSA_PASSIN=pass:' + caPassword + '/usr/local/bin/easyrsa build-client-full ' + username + ' nopass', function(error, stdout, stderr){ res.send(stdout); });
 		} else {
 			res.status(400).send("Specify Username!");
 		}
@@ -124,8 +135,9 @@ app.get('/addClient', function(req, res) {
 app.get('/revokeClient', function(req, res) {
 	if (serverStatus.isSetup) {
 		username = req.query.username.replace(usernameRegex, "_");;
+		caPassword = req.query.capass.replace(usernameRegex, "_");
 		if (username) {
-			exec('/usr/local/bin/ovpn_revokeclient ' + username + ' remove', function(error, stdout, stderr){ res.send(stdout); });
+			exec('/usr/local/bin/ovpn_revokeclient ' + username + ' remove' + caPassword, function(error, stdout, stderr){ res.send(stdout); });
 		} else {
 			res.status(400).send("Specify Username!");
 		}
