@@ -4,9 +4,10 @@ const app = require('express')(); // Express prevzame nalogo HTML strežnika
 const http = require('http').createServer(app); // Ustvarimo http strežnik, njegov handler je app - express
 http.listen(8080); // http strežniku določimo vrata
 
-const exec = require('child_process').exec;
-const fs = require('fs');
+const exec = require('child_process').exec;	// Child_process omogoča zaganjanje zunanjih programov
+const fs = require('fs');	// Fs omogoča branje in pisanje datotek
 
+// Objekt server vsebuje podatke o stanju strežnika in metode za upravljanje
 const server = {
 	isSetup: false,
 	setupInProgress: false,
@@ -42,16 +43,16 @@ const server = {
 		this.domain = '';
 	},
 	get config() {
-		return JSON.stringify(
-			{
-				isSetup: this.isSetup,
-				isRunning: this.isRunning,
-				hasCApass: this.hasCApass,
-				domain: this.domain
-			}
-		);
+		// Funkcija vrne objekt, ki vsebuje konfiguracijo
+		return {
+			isSetup: this.isSetup,
+			isRunning: this.isRunning,
+			hasCApass: this.hasCApass,
+			domain: this.domain
+		};
 	},
 	set config(config) {
+		// Funkcija sprejme objekt in zapiše konfiguracijo
 		this.isSetup = config.isSetup;
 		this.isRunning = config.isRunning;
 		this.hasCApass = config.hasCApass;
@@ -59,8 +60,10 @@ const server = {
 	}
 };
 
+// S tem prečistimo uporabnikov vnos
 const usernameRegex = new RegExp("[^a-z0-9-.]","gi");
 
+// Preberemo konfiguracijo prejšnjega kontejnerja in prepišemo privzeto
 try {
 	configFile = fs.readFileSync('/etc/openvpn/gui-conf.json');
 	server.config = JSON.parse(configFile);
@@ -69,7 +72,7 @@ try {
 }
 
 function saveConfig() {
-	fs.writeFileSync('/etc/openvpn/gui-conf.json', server.config);
+	fs.writeFileSync('/etc/openvpn/gui-conf.json', JSON.stringify(server.config));
 }
 
 //	Start the OpenVPN server process if it was running before
@@ -201,5 +204,5 @@ app.get('/getOvpn', function(req, res) {
 
 app.get('/getStatus.json', function(req, res) {
 	res.setHeader('Content-Type', 'application/json');
-	res.end(server.config);
+	res.end(JSON.stringify(server.config));
 });
