@@ -74,6 +74,7 @@ function saveConfig() {
 
 //	Start the OpenVPN server process if it was running before
 if (server.isRunning) {
+	server.isRunning = false;
 	server.start();
 }
 
