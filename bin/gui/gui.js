@@ -7,38 +7,81 @@ http.listen(8080); // http strežniku določimo vrata
 const exec = require('child_process').exec;
 const fs = require('fs');
 
-let serverStatus;
-let setupInProgress = false;
+const server = {
+	isSetup: false,
+	setupInProgress: false,
+	isRunning: false,
+	hasCApass: false,
+	domain: '',
+	serverExec: null,
+	start() {
+		if (!this.isRunning) {
+			this.isRunning = true;
+			this.serverExec = exec('ovpn_run');
+		}
+	},
+	stop() {
+		if (this.isRunning) {
+			if (this.serverExec.kill()) {
+				this.isRunning = false;
+			}
+		}
+	},
+	toggle() {
+		if (this.isRunning) {
+			this.stop();
+		} else {
+			this.start();
+		}
+	},
+	reset() {
+		this.isSetup = false;
+		this.setupInProgress = false;
+		this.isRunning = false;
+		this.hasCApass = false;
+		this.domain = '';
+	},
+	get config() {
+		return JSON.stringify(
+			{
+				isSetup: this.isSetup,
+				isRunning: this.isRunning,
+				hasCApass: this.hasCApass,
+				domain: this.domain
+			}
+		);
+	},
+	set config(config) {
+		this.isSetup = config.isSetup;
+		this.isRunning = config.isRunning;
+		this.hasCApass = config.hasCApass;
+		this.domain = config.domain;
+	}
+};
 
 const usernameRegex = new RegExp("[^a-z0-9-.]","gi");
 
 try {
 	configFile = fs.readFileSync('/etc/openvpn/gui-conf.json');
-	serverStatus = JSON.parse(configFile);
+	server.config = JSON.parse(configFile);
 } catch (err) {
-	serverStatus = new Object();
-	serverStatus.isSetup = false;
-	serverStatus.isRunning = false;
-	serverStatus.hasCApass = false;
-	serverStatus.domain = 'vasa.domena.si';
+	console.log("No config, using defauts.");
 }
 
 function saveConfig() {
-	fs.writeFileSync('/etc/openvpn/gui-conf.json', JSON.stringify(serverStatus));
+	fs.writeFileSync('/etc/openvpn/gui-conf.json', server.config);
 }
 
-let server;
-
 //	Start the OpenVPN server process if it was running before
-if (serverStatus.isRunning) {
-	server = exec('ovpn_run');
+if (server.isRunning) {
+	server.start();
 }
 
 //  Serving files
 app.get('/', function(req, res) {
-	if (serverStatus.isSetup) {
+	if (server.isSetup) {
 		res.sendFile('/usr/local/bin/gui/public/index_config.html');
-	} else if (setupInProgress) {
+	} else if (server.setupInProgress) {
 		res.sendFile('/usr/local/bin/gui/public/index_waiting.html');
 	} else {
 		res.sendFile('/usr/local/bin/gui/public/index_setup.html');
@@ -59,33 +102,21 @@ app.get('/styles/bootstrap.min.css', function(req, res) {
 
 //	Server management
 app.get('/startStop', function(req, res) {
-	if (serverStatus.isRunning) {
-		if (server.kill()) {
-			serverStatus.isRunning = false;
-		}
-	} else {
-		server = exec('ovpn_run');
-		serverStatus.isRunning = true;
-	}
+	server.toggle();
 	saveConfig();
 	res.end();
 });
 
 app.get('/fullReset', function(req, res) {
-	if (serverStatus.isRunning) {
-		server.kill();
-	}
-	serverStatus.isRunning = false;
-	serverStatus.isSetup = false;
-	serverStatus.domain = '';
-	serverStatus.hasCApass = false;
-	exec('rm -r /etc/openvpn/*')
+	server.stop();
+	server.reset();
+	exec('rm -r /etc/openvpn/*');
 	res.end();
 });
 
 //	Client management
 app.get('/setupServer', function(req, res) {
-	if (!serverStatus.isSetup) {
+	if (!server.isSetup) {
 		domain = req.query.domain;
 		caPassword = req.query.capass.replace(usernameRegex, "_");
 		let invalidDomain = new RegExp("[^a-z0-9-.]","i");
@@ -93,19 +124,18 @@ app.get('/setupServer', function(req, res) {
 			let command;
 			if (caPassword) {
 				command = '/usr/local/bin/ovpn_initpki "" ' + caPassword;
-				serverStatus.hasCApass = true;
+				server.hasCApass = true;
 			} else {
 				command = '/usr/local/bin/ovpn_initpki nopass';
 			}
-			setupInProgress = true;
+			server.setupInProgress = true;
 			exec('/usr/local/bin/ovpn_genconfig -u udp://' + domain, function(error, stdout, stderr) {
 				exec(command, function(error, stdout, stderr) {
-					serverStatus.domain = domain;
-					serverStatus.isSetup = true;
-					server = exec('ovpn_run');
-					serverStatus.isRunning = true;
+					server.domain = domain;
+					server.isSetup = true;
+					server.start();
 					saveConfig();
-					setupInProgress = false;
+					server.setupInProgress = false;
 					res.send(stdout); 
 				});
 			});
@@ -119,7 +149,7 @@ app.get('/setupServer', function(req, res) {
 
 //	Client management
 app.get('/addClient', function(req, res) {
-	if (serverStatus.isSetup) {
+	if (server.isSetup) {
 		username = req.query.username.replace(usernameRegex, "_");
 		caPassword = req.query.capass.replace(usernameRegex, "_");
 		if (username) {
@@ -133,7 +163,7 @@ app.get('/addClient', function(req, res) {
 });
 
 app.get('/revokeClient', function(req, res) {
-	if (serverStatus.isSetup) {
+	if (server.isSetup) {
 		username = req.query.username.replace(usernameRegex, "_");;
 		caPassword = req.query.capass.replace(usernameRegex, "_");
 		if (username) {
@@ -148,7 +178,7 @@ app.get('/revokeClient', function(req, res) {
 
 //	Getting data from OpenVPN server
 app.get('/clientList.json', function(req, res) {
-	if (serverStatus.isSetup) {
+	if (server.isSetup) {
 		res.setHeader('Content-Type', 'application/json');
 		exec('/usr/local/bin/ovpn_listclients_json', function(error, stdout, stderr){ res.end(stdout); });
 	} else {
@@ -157,7 +187,7 @@ app.get('/clientList.json', function(req, res) {
 });
 
 app.get('/getOvpn', function(req, res) {
-	if (serverStatus.isSetup) {
+	if (server.isSetup) {
 		username = req.query.username.replace(usernameRegex, "_");;
 		res.setHeader('Content-Type', 'application/x-openvpn-profile');
 		res.setHeader('Content-Disposition', 'attachment');
@@ -170,5 +200,5 @@ app.get('/getOvpn', function(req, res) {
 
 app.get('/getStatus.json', function(req, res) {
 	res.setHeader('Content-Type', 'application/json');
-	res.end(JSON.stringify(serverStatus));
+	res.end(server.config);
 });
