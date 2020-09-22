@@ -4,7 +4,8 @@
   "description": "A web GUI for managing the OpenVPN server",
   "main": "gui.js",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "express-basic-auth": "^1.2.0"
   },
   "devDependencies": {},
   "scripts": {
@@ -13,4 +14,3 @@
   "author": "sasodoma",
   "license": "ISC"
 }
-

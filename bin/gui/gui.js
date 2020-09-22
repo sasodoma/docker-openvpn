@@ -7,6 +7,8 @@ http.listen(8080); // http strežniku določimo vrata
 const exec = require('child_process').exec;	// Child_process omogoča zaganjanje zunanjih programov
 const fs = require('fs');	// Fs omogoča branje in pisanje datotek
 
+const basicAuth = require('express-basic-auth');
+
 // Objekt server vsebuje podatke o stanju strežnika in metode za upravljanje
 const server = {
 	isSetup: false,
@@ -14,6 +16,10 @@ const server = {
 	isRunning: false,
 	hasCApass: false,
 	domain: '',
+	
+	username: '',
+	password: '',
+	
 	serverExec: null,
 	start() {
 		if (!this.isRunning) {
@@ -42,13 +48,23 @@ const server = {
 		this.hasCApass = false;
 		this.domain = '';
 	},
+	get status() {
+		return {
+			isSetup: this.isSetup,
+			isRunning: this.isRunning,
+			hasCApass: this.hasCApass,
+			domain: this.domain,
+		};
+	},
 	get config() {
 		// Funkcija vrne objekt, ki vsebuje konfiguracijo
 		return {
 			isSetup: this.isSetup,
 			isRunning: this.isRunning,
 			hasCApass: this.hasCApass,
-			domain: this.domain
+			domain: this.domain,
+			username: this.username,
+			password: this.password,
 		};
 	},
 	set config(config) {
@@ -57,8 +73,26 @@ const server = {
 		this.isRunning = config.isRunning;
 		this.hasCApass = config.hasCApass;
 		this.domain = config.domain;
+		this.username = config.username;
+		this.password = config.password;
 	}
 };
+
+const auth = {
+	enabled: false,
+	middleware(req, res, next) {
+		if (this.enabled) {
+			basicAuth({
+				users: { [server.username]: server.password },
+				challenge: true
+			})(res, req, next);
+		} else {
+			next();
+		}
+	}
+};
+
+app.use(auth.middleware);
 
 // S tem prečistimo uporabnikov vnos
 const usernameRegex = new RegExp("[^a-z0-9-.]","gi");
@@ -67,6 +101,9 @@ const usernameRegex = new RegExp("[^a-z0-9-.]","gi");
 try {
 	configFile = fs.readFileSync('/etc/openvpn/gui-conf.json');
 	server.config = JSON.parse(configFile);
+	if (server.username && server.password) {
+		auth.enabled = true;
+	}
 } catch (err) {
 	console.log("No config, using defauts.");
 }
@@ -123,6 +160,15 @@ app.get('/setupServer', function(req, res) {
 	if (!server.isSetup) {
 		domain = req.query.domain;
 		caPassword = req.query.capass.replace(usernameRegex, "_");
+		guiUsername = req.query.guiname;
+		guiPassword = req.query.guipass;
+		
+		if (guiUsername && guiPassword) {
+			server.username = guiUsername;
+			server.password = guiPassword;
+			auth.enabled = true;
+		}
+		
 		let invalidDomain = new RegExp("[^a-z0-9-.]","i");
 		if (domain && !invalidDomain.test(domain)) {
 			let command;
@@ -204,5 +250,5 @@ app.get('/getOvpn', function(req, res) {
 
 app.get('/getStatus.json', function(req, res) {
 	res.setHeader('Content-Type', 'application/json');
-	res.end(JSON.stringify(server.config));
+	res.end(JSON.stringify(server.status));
 });

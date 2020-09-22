@@ -20,8 +20,15 @@
 							Če ga izgubite, boste morali strežnik ponastaviti in vsi uporabniki bodo izbrisani. Pustite prazno za izdajo potrdil
 							brez gesla.</p>
 							<input type="password" class="form-control mb-3" placeholder="Geslo za potrdila" id="ca-password">
-							
-							<div class="text-center md-3">
+							<div class="custom-control custom-switch mb-3">
+								<input type="checkbox" class="custom-control-input" id="gui-lock">
+								<label class="custom-control-label" for="gui-lock">Zaščiti uporabniški vmesnik z geslom</label>
+							</div>
+							<div class="w-25 mb-3" id="gui-lock-div" style="display: none">
+								<input type="text" class="form-control mb-3" placeholder="Uporabniško ime" id="gui-username">
+								<input type="password" class="form-control mb-3" placeholder="Geslo" id="gui-password">
+							</div>
+							<div class="text-center mb-3">
 								<button class="btn btn-primary" type="button" id="next-button">Naprej</button>
 							</div>
 							
@@ -41,24 +48,49 @@
 			window.addEventListener('load', function() {
 				domain = document.getElementById('domain');		
 				caPass = document.getElementById('ca-password');
+				guiLock = document.getElementById('gui-lock');
+				guiLockDiv = document.getElementById('gui-lock-div');
+				guiPassword = document.getElementById('gui-password');
+				guiUsername = document.getElementById('gui-username');
 				spinnerDiv = document.getElementById('loading-div');
 				nextButton = document.getElementById('next-button');
 				
+				guiLock.addEventListener('click', showLockForm);
 				nextButton.addEventListener('click', setupServer);
 			});
 			
 			let invalidDomain = new RegExp("[^a-z0-9-.]","i");
 			
+			function showLockForm(checked) {
+				if (guiLock.checked) {
+					guiLockDiv.style.display = '';
+				} else {
+					guiLockDiv.style.display = 'none';
+				}
+			}
+			
 			function setupServer() {
 				if (!invalidDomain.test(domain.value)) {
-					spinnerDiv.style.display = '';
-					$.get('/setupServer?domain=' + domain.value + '&capass=' + caPass.value, function(data) {
-						window.location.reload();
-					}).fail(function() {
-						window.location.reload();
-					});
+					if (guiUsername.value || !guiLock.checked) {
+						if (guiPassword.value || !guiLock.checked) {
+							spinnerDiv.style.display = '';
+							let getPath = '/setupServer?domain=' + domain.value + '&capass=' + caPass.value;
+							if (guiLock.checked) {
+								getPath += '&guiname=' + guiUsername.value + '&guipass=' + guiPassword.value;
+							}
+							$.get(getPath, function(data) {
+								window.location.reload();
+							}).fail(function() {
+								window.location.reload();
+							});
+						} else {
+							alert('Vnesite geslo za uporabniški vmesnik!');
+						}
+					} else {
+						alert('Vnesite uporabniško ime!');
+					}
 				} else {
-					alert("Neveljavno ime domene!");
+					alert('Neveljavno ime domene!');
 				}
 			}
 		</script>
