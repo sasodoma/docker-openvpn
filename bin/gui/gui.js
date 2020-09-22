@@ -47,6 +47,8 @@ const server = {
 		this.isRunning = false;
 		this.hasCApass = false;
 		this.domain = '';
+		this.username = '';
+		this.password = '';
 	},
 	get status() {
 		return {
@@ -81,11 +83,11 @@ const server = {
 const auth = {
 	enabled: false,
 	middleware(req, res, next) {
-		if (this.enabled) {
+		if (auth.enabled) {
 			basicAuth({
 				users: { [server.username]: server.password },
 				challenge: true
-			})(res, req, next);
+			})(req, res, next);
 		} else {
 			next();
 		}
@@ -151,6 +153,7 @@ app.get('/startStop', function(req, res) {
 app.get('/fullReset', function(req, res) {
 	server.stop();
 	server.reset();
+	auth.enabled = false;
 	exec('rm -r /etc/openvpn/*');
 	res.end();
 });
