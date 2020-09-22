@@ -15,6 +15,7 @@ A web GUI has been added for easy configuration.
 
 * Initialize the `$OVPN_DATA` container that will hold the configuration files
   and certificates.
+  
       docker volume create --name $OVPN_DATA
 
 * Start OpenVPN server process
