@@ -169,7 +169,6 @@ app.get('/setupServer', function(req, res) {
 		if (guiUsername && guiPassword) {
 			server.username = guiUsername;
 			server.password = guiPassword;
-			auth.enabled = true;
 		}
 		
 		let invalidDomain = new RegExp("[^a-z0-9-.]","i");
@@ -187,6 +186,7 @@ app.get('/setupServer', function(req, res) {
 					server.domain = domain;
 					server.isSetup = true;
 					server.start();
+					auth.enabled = true;
 					saveConfig();
 					server.setupInProgress = false;
 					res.send(stdout); 
