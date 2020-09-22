@@ -7,7 +7,7 @@ LABEL maintainer="Kyle Manna <kyle@kylemanna.com>"
 
 # Testing: pamtester
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories && \
-    apk add --update openvpn iptables bash easy-rsa openvpn-auth-pam google-authenticator pamtester nodejs npm && \
+    apk add --update openvpn iptables bash easy-rsa openvpn-auth-pam pamtester nodejs npm && \
     ln -s /usr/share/easy-rsa/easyrsa /usr/local/bin && \
     rm -rf /tmp/* /var/tmp/* /var/cache/apk/* /var/cache/distfiles/*
 
@@ -33,5 +33,3 @@ RUN chmod a+x /usr/local/bin/*
 RUN cd /usr/local/bin/gui && npm install
 RUN chmod a+x /usr/local/bin/gui/gui.js
 
-# Add support for OTP authentication using a PAM module
-ADD ./otp/openvpn /etc/pam.d/
