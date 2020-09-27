@@ -18,8 +18,8 @@ A web GUI has been added for easy configuration.
   
       docker volume create --name $OVPN_DATA
 
-* Start OpenVPN server process
+* Create OpenVPN server container. (To limit GUI access to a single interface use `-p <interface-ip>:8080:8080/tcp`)
 
-      docker run -v $OVPN_DATA:/etc/openvpn -d -p 1194:1194/udp -p 8080:8080/tcp --cap-add=NET_ADMIN sasodoma/openvpn
+      docker run -v $OVPN_DATA:/etc/openvpn -d --restart unless-stopped -p 1194:1194/udp -p 8080:8080/tcp --cap-add=NET_ADMIN sasodoma/openvpn
 
 * A GUI becomes avaliable on port 8080
