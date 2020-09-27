@@ -20,6 +20,6 @@ A web GUI has been added for easy configuration.
 
 * Start OpenVPN server process
 
-      docker run -v $OVPN_DATA:/etc/openvpn -d -p 1194:1194/udp -p 8080:8080/tcp --cap-add=NET_ADMIN sasodoma/openvpn
+      docker run -v $OVPN_DATA:/etc/openvpn -d -p 1194:1194/udp -p 8080:8080/tcp --cap-add=NET_ADMIN sasodoma/openvpngui
 
 * A GUI becomes avaliable on port 8080
