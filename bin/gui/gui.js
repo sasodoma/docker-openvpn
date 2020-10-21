@@ -186,7 +186,9 @@ app.get('/setupServer', function(req, res) {
 					server.domain = domain;
 					server.isSetup = true;
 					server.start();
-					auth.enabled = true;
+					if (server.username && server.password) {
+						auth.enabled = true;
+					}
 					saveConfig();
 					server.setupInProgress = false;
 					res.send(stdout); 
